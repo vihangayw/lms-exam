@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>lms</artifactId>
+        <groupId>lk.mc</groupId>
+
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>web</artifactId>
+    <version>1.2.5</version>
+    <name>web</name>
+    <description>LMS EXAM PROJECT</description>
+
+    <packaging>war</packaging>
+    <build>
+        <!--<finalName>sms-mob</finalName>-->
+        <finalName>lms-exam</finalName>
+    </build>
+
+    <!--<properties>-->
+    <!--<maven.compiler.source>1.9</maven.compiler.source>-->
+    <!--<maven.compiler.target>1.9</maven.compiler.target>-->
+    <!--<java.version>1.9</java.version>-->
+    <!--</properties>-->
+
+    <dependencies>
+        <dependency>
+            <groupId>lk.mc</groupId>
+            <artifactId>common_utility</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>lk.mc</groupId>
+            <artifactId>student</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>org.testng</groupId>-->
+        <!--<artifactId>testng</artifactId>-->
+        <!--<version>7.4.0</version>-->
+        <!--<scope>compile</scope>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.9.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bull.javamelody</groupId>
+            <artifactId>javamelody-core</artifactId>
+            <version>1.91.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.bull.javamelody</groupId>
+            <artifactId>javamelody-spring-boot-starter</artifactId>
+            <version>1.77.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- ZXing JavaSE (includes MatrixToImageWriter) -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jai-imageio</groupId>
+            <artifactId>jai-imageio-core</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.1.0-jre</version> <!-- or latest stable -->
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.29</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox-tools</artifactId>
+            <version>2.0.29</version>
+        </dependency>
+
+    </dependencies>
+</project>

@@ -1,0 +1,53 @@
+#  Template maven-build
+
+#  This template allows you to test and build your Java project with Maven.
+#  The workflow allows running tests, code checkstyle and security scans on the default branch.
+
+# Prerequisites: pom.xml and appropriate project structure should exist in the lk.mc.report.repository.
+
+image: maven:3.6.3
+
+pipelines:
+  branches:
+    stage:
+      #      - step:
+      #          name: Build and Test
+      #          caches:
+      #            - maven
+      #          script:
+      #            - mvn clean compile package
+      #          artifacts:
+      #            - /opt/atlassian/pipelines/agent/build/web/target/ts-queue.war
+      #      - step:
+      #          name: Verify Build
+      #          script:
+      #            - cd /opt/atlassian/pipelines/agent/build/web/target
+      #            - ls
+      #            - pipe: atlassian/slack-notify:2.0.0
+      #              variables:
+      #                WEBHOOK_URL: $WEBHOOK_URL
+      #                MESSAGE: '@channel :bellhop_bell: Deployment Alert !!! Build has been completed, :stopwatch: waiting for deployment...'
+      - step:
+          name: Deploy to Dev
+          deployment: Production
+          trigger: automatic
+          script:
+            - pipe: atlassian/sftp-deploy:0.5.11
+              variables:
+                USER: $USER
+                SERVER: $HOST
+                REMOTE_PATH: '/opt/tomcat/webapps/'
+                LOCAL_PATH: '/opt/atlassian/pipelines/agent/build/web/target/ts-queue.war'
+                PASSWORD: $PASSWORD
+                # SSH_KEY: 'key here'
+                # EXTRA_ARGS: '<string>' # Optional.
+                # DEBUG: '<boolean>' # Optional.
+      - step:
+          name: Display success message
+          script:
+            - pipe: atlassian/slack-notify:2.0.0
+              variables:
+                WEBHOOK_URL: $WEBHOOK_URL
+                PRETEXT: 'Deployment Successful! :rocket::rocket::rocket:'
+                MESSAGE: 'New beta release was published :point_right: http://${HOST}:8080/ts-queue'
+            - echo "Deployment successful!"

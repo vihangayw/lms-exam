@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="report name" pageWidth="216" pageHeight="216" whenNoDataType="AllSectionsNoDetail" columnWidth="202"
+              leftMargin="7" rightMargin="7" topMargin="0" bottomMargin="6" uuid="c27ea944-431b-43df-ab5c-808efcddf205">
+    <property name="ireport.zoom" value="1.0"/>
+    <property name="ireport.x" value="0"/>
+    <property name="ireport.y" value="0"/>
+    <parameter name="TOKEN" class="java.lang.String"/>
+    <parameter name="CAT" class="java.lang.String"/>
+    <parameter name="DATE" class="java.lang.String"/>
+    <parameter name="TIME" class="java.lang.String"/>
+    <parameter name="WELCOME" class="java.lang.String"/>
+    <parameter name="FOOTER" class="java.lang.String"/>
+    <parameter name="PREFIX" class="java.lang.String"/>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="117" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="202" height="29" uuid="3f5d9c68-4ff8-4b84-9abd-8223a24ef6ec"/>
+                <textElement textAlignment="Center">
+                    <font size="14"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{WELCOME}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="29" width="202" height="24" uuid="7585e864-221c-4ceb-8372-e817fc86f156"/>
+                <textElement textAlignment="Center">
+                    <font size="15"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{CAT}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="53" width="202" height="15" uuid="88778f96-57c3-4a1a-b240-ea84d7732a0c"/>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$P{PREFIX}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="68" width="202" height="26" uuid="754fd8af-d0a3-495c-9510-defdd54de99b"/>
+                <textElement textAlignment="Center">
+                    <font size="19" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TOKEN}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="2" y="98" width="100" height="19" uuid="2e842466-4477-4933-a5c2-0ca184587b96"/>
+                <textElement>
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{DATE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="102" y="98" width="100" height="19" uuid="75baf860-0938-4a9d-9b7b-06f4390a424b"/>
+                <textElement textAlignment="Right">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TIME}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <summary>
+        <band height="72" splitType="Stretch">
+            <line>
+                <reportElement x="51" y="39" width="100" height="1" forecolor="#CCCCCC"
+                               uuid="7afa501d-8fe0-4a99-bfad-7b9fb7d5f64a"/>
+            </line>
+            <textField>
+                <reportElement x="2" y="0" width="200" height="20" uuid="febabd96-235e-4eb5-a482-fdf52885c8f6"/>
+                <textElement textAlignment="Center">
+                    <font size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{FOOTER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>
