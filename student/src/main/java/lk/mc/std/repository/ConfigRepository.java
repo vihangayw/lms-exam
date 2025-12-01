@@ -13,7 +13,7 @@ import javax.transaction.Transactional;
  * @since 26/09/22
  * MC-lms
  */
-@Repository
+@Repository("stdConfigRepository")
 @Transactional
 public interface ConfigRepository extends JpaRepository<Configs, String> {
 

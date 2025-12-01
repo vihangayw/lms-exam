@@ -22,18 +22,18 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SuppressWarnings("Duplicates")
 @SpringBootApplication
 @ComponentScan(basePackages = "lk.mc.*")
-@EntityScan(basePackages = "lk.mc.*")
-@EnableJpaRepositories(basePackages = "lk.mc.*")
+@EntityScan(basePackages = "lk.mc.std.bean")
+@EnableJpaRepositories(basePackages = "lk.mc.std.repository")
 @Import({JobRunnerConfiguration.class, ActiveMqConfiguration.class, ConfigurationManager.class, JobRunnerScheduleStarter.class})
-public class LmsApplication extends SpringBootServletInitializer {
+public class ExamApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
-        SpringApplication.run(LmsApplication.class);
+        SpringApplication.run(ExamApplication.class);
     }
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        return builder.sources(LmsApplication.class);
+        return builder.sources(ExamApplication.class);
     }
 
 

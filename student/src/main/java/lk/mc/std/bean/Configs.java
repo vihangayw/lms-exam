@@ -15,7 +15,7 @@ import javax.persistence.*;
  * MC-lms
  */
 @SuppressWarnings("JpaAttributeTypeInspection")
-@Entity
+@Entity(name = "StdConfigs")
 @Data
 @NamedQueries({
 })

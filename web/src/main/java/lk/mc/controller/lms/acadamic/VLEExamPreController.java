@@ -1,14 +1,12 @@
 package lk.mc.controller.lms.acadamic;
 
+import lk.mc.model.ReuploadRequest;
 import lk.mc.service.lms.academic.ExamPreflightService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -48,5 +46,18 @@ public class VLEExamPreController {
     public ResponseEntity preFlight(@PathVariable String qr, HttpServletRequest request) {
         logger.info(request.getRequestURI());
         return service.preFlight(qr);
+    }
+
+    @GetMapping("/{qr}")
+    public ResponseEntity getByQr(@PathVariable String qr, HttpServletRequest request, HttpServletResponse response) {
+        logger.info(request.getRequestURI() + " | QR: " + qr);
+        return service.getByQrCode(qr, request, response);
+    }
+
+    @PostMapping("/reupload")
+    public ResponseEntity reupload(@RequestBody ReuploadRequest requestBody,
+                                   HttpServletRequest request, HttpServletResponse response) {
+        logger.info(request.getRequestURI() + " | QR: " + requestBody.getQr() + " | UserName: " + requestBody.getUserName());
+        return service.reupload(requestBody, request, response);
     }
 }

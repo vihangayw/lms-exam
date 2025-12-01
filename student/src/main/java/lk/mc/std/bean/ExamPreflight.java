@@ -13,7 +13,9 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name = "exam_preflight")
+@Table(name = "exam_preflight", indexes = {
+        @Index(name = "idx_qrcode", columnList = "qrcode")
+})
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"}, ignoreUnknown = true)
@@ -29,7 +31,17 @@ public class ExamPreflight implements Serializable {
     private String deskImageOriginalFileName; //original file name
     private String image360; //id_360.jpg
     private String image360OriginalFileName; //original file name
+
+    @Column(name = "qrcode", unique = true)
     private String qrcode;
+    private boolean reupload;
+    private String admin;
+
+    @Transient
+    private String url360; //id_360.jpg
+
+    @Transient
+    private String urlDesk; //id.jpg
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Colombo")
     @Temporal(TemporalType.TIMESTAMP)

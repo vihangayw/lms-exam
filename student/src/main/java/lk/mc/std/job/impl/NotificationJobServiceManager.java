@@ -34,10 +34,21 @@ public class NotificationJobServiceManager implements NotificationJobService {
     public void quizImg(int studentQuizId, String imgName) {
         logger.info(NOTIFICATION_BOT + " Quiz|Img|{}", studentQuizId);
         String url =
-                Constants.SEVER_BASE.concat("quiz/").concat(String.valueOf(studentQuizId))
+                Constants.SEVER_BASE.concat("quiz/1/").concat(String.valueOf(studentQuizId))
                         .concat("/").concat(imgName);
         MqttPublishInfo mqttPublishInfo = new MqttPublishInfo(
                 MQTTUtils.TOPIC_QUIZ_IMG + studentQuizId);
+        new TsActivePublisher(mqttPublishInfo, mqttDispatchService).publishMessage(url);
+    }
+
+    @Override
+    public void quizScr(int studentQuizId, String imgName) {
+        logger.info(NOTIFICATION_BOT + " Quiz|SCRN|{}", studentQuizId);
+        String url =
+                Constants.SEVER_BASE.concat("quiz/0/").concat(String.valueOf(studentQuizId))
+                        .concat("/").concat(imgName);
+        MqttPublishInfo mqttPublishInfo = new MqttPublishInfo(
+                MQTTUtils.TOPIC_QUIZ_SCRN + studentQuizId);
         new TsActivePublisher(mqttPublishInfo, mqttDispatchService).publishMessage(url);
     }
 

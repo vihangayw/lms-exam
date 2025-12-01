@@ -18,6 +18,9 @@ public interface NotificationJobService {
     @Job(name = NOTIFICATION_BOT + " QUIZ IMG")
     public void quizImg(int studentQuizId, String imgName);
 
+    @Job(name = NOTIFICATION_BOT + " QUIZ SCRN")
+    public void quizScr(int studentQuizId, String imgName);
+
     @Job(name = NOTIFICATION_BOT + " QUIZ PreFlight Scan")
     public void preFlightScan(String qr);
 

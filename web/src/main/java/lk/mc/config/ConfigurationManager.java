@@ -7,6 +7,7 @@ import lk.mc.std.util.Constants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,7 +29,7 @@ public class ConfigurationManager {
      private final ConfigRepository repository;
 
     @Autowired
-    public ConfigurationManager(ConfigRepository repository ) {
+    public ConfigurationManager(@Qualifier("stdConfigRepository") ConfigRepository repository) {
         this.repository = repository;
     }
 
