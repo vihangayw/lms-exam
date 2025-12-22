@@ -27,7 +27,7 @@ public class Configs {
 
     public static final String SERVER_BASE_URL = "server_base_url";
     public static final String SERVER_LOCAL_PATH = "local_path";
-    public static final String SERVER_HIBERNATE = "hibernate_seq";//   http://localhost:8383/api/v1/branch/hibernate-seq/1747236200000
+//    public static final String SERVER_HIBERNATE = "hibernate_seq";//   http://localhost:8383/api/v1/branch/hibernate-seq/1747236200000
 
     @Id
     @Column(length = 20)

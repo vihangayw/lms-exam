@@ -58,21 +58,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
-    @Autowired
-    private MaintenanceInterceptor maintenanceInterceptor;
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(maintenanceInterceptor)
-                .addPathPatterns("/crm-board/**",
-                        "/vle/student/**",
-                        "/user/**",
-                        "/other-finance/**",
-                        "/student/**",
-                        "/student-program/**",
-                        "/student-module/**",
-                        "/vle/finance/my-course-payment-detail");
-    }
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         // configure AuthenticationManager so that it knows from where to load

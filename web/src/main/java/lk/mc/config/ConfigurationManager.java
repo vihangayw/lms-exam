@@ -60,11 +60,11 @@ public class ConfigurationManager {
         log.info("............................................");
         System.out.println();
 
-        String h = CONFIGS.get(Configs.SERVER_HIBERNATE);
-        if (!TsStringUtils.isNullOrEmpty(h))
-            Constants.SERVER_HIBERNATE = h;
-        else
-            System.out.println(TsStringUtils.ANSI_RED + ("SET SERVER_HIBERNATE") + TsStringUtils.ANSI_RESET);
+//        String h = CONFIGS.get(Configs.SERVER_HIBERNATE);
+//        if (!TsStringUtils.isNullOrEmpty(h))
+//            Constants.SERVER_HIBERNATE = h;
+//        else
+//            System.out.println(TsStringUtils.ANSI_RED + ("SET SERVER_HIBERNATE") + TsStringUtils.ANSI_RESET);
 
         String localPath = CONFIGS.get(Configs.SERVER_LOCAL_PATH);
         if (!TsStringUtils.isNullOrEmpty(localPath))

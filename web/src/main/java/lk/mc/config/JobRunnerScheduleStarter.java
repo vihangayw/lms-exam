@@ -108,7 +108,7 @@ public class JobRunnerScheduleStarter {
      * Scheduled job to save audit logs from in-memory list to database
      * Runs every 30 minutes
      */
-    @Recurring(id = "save_logs", cron = "8 */30 * * * *")
+    @Recurring(id = "save_logs", cron = "8 */10 * * * *")
     @Job(name = "Save Logs")
     public void save_logs() {
         try {
