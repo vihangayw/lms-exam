@@ -99,7 +99,7 @@ public class MqttManager {
             MqttConnectOptions options = new MqttConnectOptions();
             options.setAutomaticReconnect(true);
             options.setCleanSession(false);
-            options.setMaxInflight(50); //please increase this value in a high traffic environment
+            options.setMaxInflight(1000); //50 - please increase this value in a high traffic environment
             options.setConnectionTimeout(10);
 
             if (!TsStringUtils.isNullOrEmpty(conf.getUser()))

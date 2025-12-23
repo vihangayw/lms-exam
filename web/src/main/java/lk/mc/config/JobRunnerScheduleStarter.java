@@ -97,16 +97,59 @@ public class JobRunnerScheduleStarter {
         logger.info("AUDIT_LIST cleared | Previous size: {} | Entries removed", size);
     }
 
+    /**
+     * Remove specific audit entries from the list (thread-safe)
+     * Used to remove only successfully saved records, preserving any new entries added during processing
+     *
+     * @param entriesToRemove List of entries to remove from AUDIT_LIST
+     * @return Number of entries actually removed
+     */
+    public static synchronized int removeAuditEntries(List<ExamPreflightAudit> entriesToRemove) {
+        if (entriesToRemove == null || entriesToRemove.isEmpty()) {
+            return 0;
+        }
+        int beforeSize = AUDIT_LIST.size();
+        AUDIT_LIST.removeAll(entriesToRemove);
+        int afterSize = AUDIT_LIST.size();
+        int removedCount = beforeSize - afterSize;
+        if (removedCount > 0) {
+            logger.debug("Removed {} audit entries from AUDIT_LIST | Size: {} -> {}", removedCount, beforeSize, afterSize);
+        }
+        return removedCount;
+    }
+
     public static synchronized void clearImgList() {
         int size = IMG_LIST.size();
         IMG_LIST.clear();
         logger.info("IMG_LIST cleared | Previous size: {} | Entries removed", size);
     }
 
+    /**
+     * Remove specific image entries from the list (thread-safe)
+     * Used to remove only successfully saved records, preserving any new entries added during processing
+     *
+     * @param entriesToRemove List of entries to remove from IMG_LIST
+     * @return Number of entries actually removed
+     */
+    public static synchronized int removeImgEntries(List<ExamPic> entriesToRemove) {
+        if (entriesToRemove == null || entriesToRemove.isEmpty()) {
+            return 0;
+        }
+        int beforeSize = IMG_LIST.size();
+        IMG_LIST.removeAll(entriesToRemove);
+        int afterSize = IMG_LIST.size();
+        int removedCount = beforeSize - afterSize;
+        if (removedCount > 0) {
+            logger.debug("Removed {} image entries from IMG_LIST | Size: {} -> {}", removedCount, beforeSize, afterSize);
+        }
+        return removedCount;
+    }
+
 
     /**
      * Scheduled job to save audit logs from in-memory list to database
-     * Runs every 30 minutes
+     * Runs every 10 minutes
+     * Processes records in batches to avoid large transactions
      */
     @Recurring(id = "save_logs", cron = "8 */10 * * * *")
     @Job(name = "Save Logs")
@@ -119,21 +162,56 @@ public class JobRunnerScheduleStarter {
                 return;
             }
 
-            logger.info("Saving {} audit log entries to database", logsToSave.size());
+            logger.info("Saving {} audit log entries to database (batch processing)", logsToSave.size());
 
-            // Save all logs to database
-            examPreflightAuditRepository.saveAll(logsToSave);
+            // Process in batches of 1000 to avoid large transactions
+            int batchSize = 1000;
+            int totalSaved = 0;
+            int totalRemoved = 0;
+            int totalBatches = (int) Math.ceil((double) logsToSave.size() / batchSize);
+            List<ExamPreflightAudit> successfullySavedBatches = new ArrayList<>();
 
-            // Clear the in-memory list after successful save
-            clearAuditList();
+            for (int i = 0; i < logsToSave.size(); i += batchSize) {
+                int end = Math.min(i + batchSize, logsToSave.size());
+                List<ExamPreflightAudit> batch = new ArrayList<>(logsToSave.subList(i, end));
+                int batchNumber = (i / batchSize) + 1;
 
-            logger.info("Successfully saved {} audit log entries to database and cleared AUDIT_LIST", logsToSave.size());
+                try {
+                    examPreflightAuditRepository.saveAll(batch);
+                    totalSaved += batch.size();
+                    successfullySavedBatches.addAll(batch);
+                    logger.debug("Saved batch {}/{}: {} records (total: {}/{})",
+                            batchNumber, totalBatches, batch.size(), totalSaved, logsToSave.size());
+                } catch (Exception e) {
+                    logger.error("Error saving batch {}/{} (records {}-{}): {}",
+                            batchNumber, totalBatches, i + 1, end, e.getMessage(), e);
+                    // Continue with next batch even if one fails
+                }
+            }
+
+            // Remove only successfully saved records from AUDIT_LIST
+            // This preserves any new entries added during processing
+            if (!successfullySavedBatches.isEmpty()) {
+                totalRemoved = removeAuditEntries(successfullySavedBatches);
+                logger.info("Successfully saved {} audit log entries to database in {} batches. Removed {} entries from AUDIT_LIST (new entries during processing preserved)",
+                        totalSaved, totalBatches, totalRemoved);
+            }
+
+            if (totalSaved < logsToSave.size()) {
+                logger.warn("Partially saved: {}/{} records saved. {} records remain in AUDIT_LIST for retry.",
+                        totalSaved, logsToSave.size(), AUDIT_LIST.size());
+            }
         } catch (Exception e) {
             logger.error("Error saving audit logs to database", e);
             // Don't clear the list if save failed, so logs can be retried
         }
     }
 
+    /**
+     * Scheduled job to save image entries from in-memory list to database
+     * Runs every 3 minutes
+     * Processes records in batches to avoid large transactions
+     */
     @Recurring(id = "save_img", cron = "40 */3 * * * *")
     @Job(name = "Save Pics")
     public void save_pics() {
@@ -144,17 +222,47 @@ public class JobRunnerScheduleStarter {
                 return;
             }
 
-            logger.info("Saving {} pic entries to database", logsToSave.size());
+            logger.info("Saving {} pic entries to database (batch processing)", logsToSave.size());
 
-            // Save all logs to database
-            studentQuizRepository.saveAll(logsToSave);
+            // Process in batches of 1000 to avoid large transactions
+            int batchSize = 1000;
+            int totalSaved = 0;
+            int totalRemoved = 0;
+            int totalBatches = (int) Math.ceil((double) logsToSave.size() / batchSize);
+            List<ExamPic> successfullySavedBatches = new ArrayList<>();
 
-            // Clear the in-memory list after successful save
-            clearImgList();
+            for (int i = 0; i < logsToSave.size(); i += batchSize) {
+                int end = Math.min(i + batchSize, logsToSave.size());
+                List<ExamPic> batch = new ArrayList<>(logsToSave.subList(i, end));
+                int batchNumber = (i / batchSize) + 1;
 
-            logger.info("Successfully saved {} image entries to database and cleared IMG_LIST", logsToSave.size());
+                try {
+                    studentQuizRepository.saveAll(batch);
+                    totalSaved += batch.size();
+                    successfullySavedBatches.addAll(batch);
+                    logger.debug("Saved batch {}/{}: {} records (total: {}/{})",
+                            batchNumber, totalBatches, batch.size(), totalSaved, logsToSave.size());
+                } catch (Exception e) {
+                    logger.error("Error saving batch {}/{} (records {}-{}): {}",
+                            batchNumber, totalBatches, i + 1, end, e.getMessage(), e);
+                    // Continue with next batch even if one fails
+                }
+            }
+
+            // Remove only successfully saved records from IMG_LIST
+            // This preserves any new entries added during processing
+            if (!successfullySavedBatches.isEmpty()) {
+                totalRemoved = removeImgEntries(successfullySavedBatches);
+                logger.info("Successfully saved {} image entries to database in {} batches. Removed {} entries from IMG_LIST (new entries during processing preserved)",
+                        totalSaved, totalBatches, totalRemoved);
+            }
+
+            if (totalSaved < logsToSave.size()) {
+                logger.warn("Partially saved: {}/{} records saved. {} records remain in IMG_LIST for retry.",
+                        totalSaved, logsToSave.size(), IMG_LIST.size());
+            }
         } catch (Exception e) {
-            logger.error("Error saving audit logs to database", e);
+            logger.error("Error saving image entries to database", e);
             // Don't clear the list if save failed, so logs can be retried
         }
     }

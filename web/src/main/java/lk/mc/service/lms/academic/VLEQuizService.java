@@ -13,9 +13,9 @@ import lk.mc.std.repository.ExamPreflightAuditRepository;
 import lk.mc.std.repository.StudentQuizRepository;
 import lk.mc.std.util.Constants;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jobrunr.scheduling.BackgroundJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,7 +88,7 @@ public class VLEQuizService {
                     file.mkdirs();
                     logger.info("Directory created: " + file.getAbsolutePath());
                 }
-                long epochMilli = Instant.now().toEpochMilli();
+                String epochMilli = RandomStringUtils.randomAlphanumeric(10);
                 String extension = FilenameUtils.getExtension(image.getOriginalFilename());
                 Files.copy(image.getInputStream(), Paths.get(file.getAbsolutePath()).resolve(epochMilli
                         + "." + extension), StandardCopyOption.REPLACE_EXISTING);
@@ -98,9 +97,9 @@ public class VLEQuizService {
                 JobRunnerScheduleStarter.addImgEntry(new ExamPic(path, sqid, cam == 1));
 
                 if (cam == 1)
-                    BackgroundJob.enqueue(() -> notificationJobService.quizImg(sqid, path));
+                    notificationJobService.quizImg(sqid, path);
                 else
-                    BackgroundJob.enqueue(() -> notificationJobService.quizScr(sqid, path));
+                    notificationJobService.quizScr(sqid, path);
                 return ResponseEntity.ok().body(new ResponseWrapper<>().responseOk(true));
             } catch (IOException e) {
                 logger.error("Error occurring while saving the profile image.", e);
