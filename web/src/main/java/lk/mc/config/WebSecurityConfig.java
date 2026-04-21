@@ -166,7 +166,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
             // lms
             CorsConfiguration configuration = new CorsConfiguration();
             configuration.setAllowedOrigins(Arrays.asList(
+                    "https://mnp.metropolitancollegeedu.com",
+                    "https://mnp.metropolitancollege.lk",
                     "https://www.metropolitancollege.lk",
+                    "https://www.metropolitancollegeedu.com",
+                    "https://metropolitancollegeedu.com",
                     "https://metropolitancollege.lk",
                     "http://212.47.73.190",
                     "https://php.metropolitancollege.lk",
@@ -190,6 +194,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
             CorsConfiguration configurationAdmin = new CorsConfiguration();
             configurationAdmin.setAllowedOrigins(Arrays.asList(
                     "https://mnp.metropolitancollege.lk",
+                    "https://mnp.metropolitancollegeedu.com",
                     "http://212.47.73.190",
                     "http://localhost:3000",
                     "https://php.metropolitancollege.lk",

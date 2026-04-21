@@ -24,7 +24,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan(basePackages = "lk.mc.*")
 @EntityScan(basePackages = "lk.mc.std.bean")
 @EnableJpaRepositories(basePackages = "lk.mc.std.repository")
-@Import({JobRunnerConfiguration.class, ActiveMqConfiguration.class, ConfigurationManager.class, JobRunnerScheduleStarter.class})
+@Import({JobRunnerConfiguration.class, ConfigurationManager.class, JobRunnerScheduleStarter.class})
+//ActiveMqConfiguration.class,
 public class ExamApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {

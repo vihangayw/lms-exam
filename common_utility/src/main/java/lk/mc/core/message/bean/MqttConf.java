@@ -25,6 +25,10 @@ public class MqttConf {
     private String user;
     private String password;
 
+    private String ssl;
+    private String ca;
+    private String cert;
+    private String certPw;
 
     @Override
     public String toString() {

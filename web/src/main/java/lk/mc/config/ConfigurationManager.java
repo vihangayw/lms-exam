@@ -78,6 +78,12 @@ public class ConfigurationManager {
         else
             System.out.println(TsStringUtils.ANSI_RED + ("SET SEVER_BASE") + TsStringUtils.ANSI_RESET);
 
+        String LMS_SEVER_BASE = CONFIGS.get(Configs.LMS_SEVER_BASE);
+        if (!TsStringUtils.isNullOrEmpty(LMS_SEVER_BASE))
+            Constants.LMS_SEVER_BASE = LMS_SEVER_BASE;
+        else
+            System.out.println(TsStringUtils.ANSI_RED + ("SET LMS_SEVER_BASE") + TsStringUtils.ANSI_RESET);
+
 
         exc();
     }

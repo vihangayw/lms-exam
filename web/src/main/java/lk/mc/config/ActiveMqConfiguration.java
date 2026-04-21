@@ -16,30 +16,38 @@ import org.springframework.context.annotation.Configuration;
  * @since 02/07/22
  * MC-lms
  */
-@Configuration
+//@Configuration
 public class ActiveMqConfiguration {
-    private static Logger logger = LogManager.getLogger(ActiveMqConfiguration.class);
+//    private static Logger logger = LogManager.getLogger(ActiveMqConfiguration.class);
 
-    @Value("${spring.activemq.broker-url}")
-    private String broker;
-    @Value("${spring.activemq.user}")
-    private String userName;
-    @Value("${spring.activemq.password}")
-    private String password;
-
-    /**
-     * Initialize MQTT configurations by setting broker, user, password and other configs
-     */
-    @Bean
-    public void initActiveMq() {
-        String encrypt = "";
-        try {
-            encrypt = EncryptUtils.decrypt(password);
-        } catch (Exception e) {
-            logger.error("Decrypt password fail >> " + e.getMessage(), e);
-        }
-
-        MqttManager.createInstance(new MqttConf(broker, userName, encrypt));
-    }
+//    @Value("${spring.activemq.broker-url}")
+//    private String broker;
+//    @Value("${spring.activemq.user}")
+//    private String userName;
+//    @Value("${spring.activemq.password}")
+//    private String password;
+//
+//    @Value("${spring.activemq.ssl}")
+//    private String ssl;
+//    @Value("${spring.activemq.ca}")
+//    private String ca;
+//    @Value("${spring.activemq.cert}")
+//    private String cert;
+//    @Value("${spring.activemq.pw}")
+//    private String key;
+//    /**
+//     * Initialize MQTT configurations by setting broker, user, password and other configs
+//     */
+//    @Bean
+//    public void initActiveMq() {
+//        String encrypt = "";
+//        try {
+//            encrypt = EncryptUtils.decrypt(password);
+//        } catch (Exception e) {
+//            logger.error("Decrypt password fail >> " + e.getMessage(), e);
+//        }
+//
+//        MqttManager.createInstance(new MqttConf(broker, userName, encrypt, ssl, ca, cert, key));
+//    }
 
 }

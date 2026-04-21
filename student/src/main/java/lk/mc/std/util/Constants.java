@@ -10,6 +10,7 @@ package lk.mc.std.util;
 public class Constants {
 
     public static String SEVER_BASE = "http://103.1.179.245:8080/";
+    public static String LMS_SEVER_BASE = "http://103.1.179.245:8080/lms-mc";
     public static String SERVER_LOCAL_PATH = "/Users/macbookair/Projects/lms/ROOT/";
 
 }

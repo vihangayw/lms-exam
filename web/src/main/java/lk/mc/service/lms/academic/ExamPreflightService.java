@@ -170,7 +170,7 @@ public class ExamPreflightService {
     }
 
 
-    public ResponseEntity preFlight(String qr) {
+    public ResponseEntity<?> preFlight(String qr) {
         notificationJobService.preFlightScan(qr);
         String auditDescription = "Preflight QR scanned! (" + qr + ")";
         createAuditLog(qr, null, auditDescription);

@@ -35,7 +35,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.annotation.PreDestroy;
 
 import static lk.mc.core.enums.JwtTypes.*;
 
@@ -58,6 +65,10 @@ public class VLEQuizService {
     private final StudentQuizRepository studentQuizRepository;
     private final ExamPreflightAuditRepository examPreflightAuditRepository;
     private final NotificationJobService notificationJobService;
+    
+    // Separate thread pools for cam and screen image notifications
+    private final ExecutorService camImageExecutor;
+    private final ExecutorService screenImageExecutor;
 
     @Autowired
     public VLEQuizService(LocaleService localeService, JwtUserDetailsService jwtUserDetailsService, StudentQuizRepository studentQuizRepository, ExamPreflightAuditRepository examPreflightAuditRepository, NotificationJobService notificationJobService) {
@@ -66,6 +77,61 @@ public class VLEQuizService {
         this.studentQuizRepository = studentQuizRepository;
         this.examPreflightAuditRepository = examPreflightAuditRepository;
         this.notificationJobService = notificationJobService;
+        
+        // Initialize thread pools for async notification processing
+        // Configured for 400+ concurrent users
+        // Cam image thread pool: core=50, max=100, queue=1000
+        this.camImageExecutor = createThreadPool(51, 101, 1001, "cam-image-notification");
+        
+        // Screen image thread pool: core=50, max=100, queue=1000
+        this.screenImageExecutor = createThreadPool(50, 100, 1000, "screen-image-notification");
+        
+        logger.info("Initialized thread pools for image notifications: cam={}, screen={}", 
+                ((ThreadPoolExecutor) camImageExecutor).getCorePoolSize(),
+                ((ThreadPoolExecutor) screenImageExecutor).getCorePoolSize());
+    }
+    
+    @PreDestroy
+    public void destroy() {
+        logger.info("Shutting down image notification thread pools...");
+        shutdownExecutor(camImageExecutor, "cam-image");
+        shutdownExecutor(screenImageExecutor, "screen-image");
+    }
+    
+    private ThreadPoolExecutor createThreadPool(int corePoolSize, int maxPoolSize, int queueCapacity, String threadNamePrefix) {
+        ThreadFactory threadFactory = r -> {
+            Thread t = new Thread(r, threadNamePrefix);
+            t.setDaemon(true);
+            return t;
+        };
+        
+        RejectedExecutionHandler rejectionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
+        
+        return new ThreadPoolExecutor(
+                corePoolSize,
+                maxPoolSize,
+                60L, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(queueCapacity),
+                threadFactory,
+                rejectionHandler
+        );
+    }
+    
+    private void shutdownExecutor(ExecutorService executor, String name) {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                logger.warn("{} executor did not terminate gracefully, forcing shutdown", name);
+                executor.shutdownNow();
+                if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    logger.error("{} executor did not terminate", name);
+                }
+            }
+        } catch (InterruptedException e) {
+            logger.error("Interrupted while shutting down {} executor", name, e);
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
     public ResponseEntity<?> pic(MultipartFile image, int sqid, int cam, HttpServletRequest request,
@@ -80,7 +146,7 @@ public class VLEQuizService {
         if (image != null && !image.isEmpty()) {
 
             try {
-                File file = new File(Constants.SERVER_LOCAL_PATH.concat("quiz/" + sqid + "/").concat(String.valueOf(sqid)));
+                File file = new File(Constants.SERVER_LOCAL_PATH.concat("quiz/" + cam + "/").concat(String.valueOf(sqid)));
 
                 if (!file.exists()) {
                     //noinspection ResultOfMethodCallIgnored
@@ -96,10 +162,24 @@ public class VLEQuizService {
                 String path = String.format("%s.%s", epochMilli, extension);
                 JobRunnerScheduleStarter.addImgEntry(new ExamPic(path, sqid, cam == 1));
 
-                if (cam == 1)
-                    notificationJobService.quizImg(sqid, path);
-                else
-                    notificationJobService.quizScr(sqid, path);
+                // Execute notification in separate thread pool to reduce response time
+                if (cam == 1) {
+                    camImageExecutor.execute(() -> {
+                        try {
+                            notificationJobService.quizImg(sqid, path);
+                        } catch (Exception e) {
+                            logger.error("Error processing cam image notification for sqid={}, path={}", sqid, path, e);
+                        }
+                    });
+                } else {
+                    screenImageExecutor.execute(() -> {
+                        try {
+                            notificationJobService.quizScr(sqid, path);
+                        } catch (Exception e) {
+                            logger.error("Error processing screen image notification for sqid={}, path={}", sqid, path, e);
+                        }
+                    });
+                }
                 return ResponseEntity.ok().body(new ResponseWrapper<>().responseOk(true));
             } catch (IOException e) {
                 logger.error("Error occurring while saving the profile image.", e);
@@ -205,6 +285,8 @@ public class VLEQuizService {
             for (ExamPic examPic : examPics) {
                 String name = examPic.getImg(); // e.g., 1749899011479.webp
                 String url = Constants.SEVER_BASE.concat("quiz/")
+                        .concat(examPic.isCam()?"1":"0")
+                        .concat("/")
                         .concat(String.valueOf(sqid))
                         .concat("/")
                         .concat(name);
