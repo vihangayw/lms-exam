@@ -124,4 +124,18 @@ public class NotificationJobServiceManager implements NotificationJobService {
         sendMqttRequest(topic, "1");
     }
 
+    @Override
+    public void chatMessage(int sqid, String messageJson) {
+        logger.info(NOTIFICATION_BOT + " Quiz|chat|sqid={}", sqid);
+        String topic = MQTTUtils.TOPIC_QUIZ_CHAT + sqid;
+        sendMqttRequest(topic, messageJson);
+    }
+
+    @Override
+    public void chatMessageAdmin(int sqid, String messageJson) {
+        logger.info(NOTIFICATION_BOT + " Quiz|chat|admin|sqid={}", sqid);
+        String topic = MQTTUtils.TOPIC_QUIZ_CHAT_ADMIN + sqid;
+        sendMqttRequest(topic, messageJson);
+    }
+
 }

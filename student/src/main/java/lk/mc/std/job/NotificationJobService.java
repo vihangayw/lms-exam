@@ -27,5 +27,10 @@ public interface NotificationJobService {
     @Job(name = NOTIFICATION_BOT + " QUIZ PreFlight Upload")
     public void preFlightUpload(String qr);
 
+    @Job(name = NOTIFICATION_BOT + " QUIZ Chat Message")
+    public void chatMessage(int sqid, String messageJson);
+
+    @Job(name = NOTIFICATION_BOT + " QUIZ Chat Message admin")
+    public void chatMessageAdmin(int sqid, String messageJson);
 
 }
