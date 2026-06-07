@@ -8,4 +8,5 @@ public class MQTTUtils {
     public static final String TOPIC_QUIZ_PRE_FLIGHT_UPLOAD = "mc/pre-exam/qr/upload/"; // intake quiz id
     public static final String TOPIC_QUIZ_CHAT = "quiz/chat/sqid/"; // intake sqid
     public static final String TOPIC_QUIZ_CHAT_ADMIN = "quiz/chat/admin/sqid/"; // intake sqid
+    public static final String TOPIC_HEALTH = "mc-exam/health";
 }

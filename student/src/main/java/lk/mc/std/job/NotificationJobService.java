@@ -33,4 +33,7 @@ public interface NotificationJobService {
     @Job(name = NOTIFICATION_BOT + " QUIZ Chat Message admin")
     public void chatMessageAdmin(int sqid, String messageJson);
 
+    @Job(name = NOTIFICATION_BOT + " Health Ping")
+    public boolean healthPing();
+
 }

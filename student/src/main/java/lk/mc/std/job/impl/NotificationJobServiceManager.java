@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -136,6 +137,32 @@ public class NotificationJobServiceManager implements NotificationJobService {
         logger.info(NOTIFICATION_BOT + " Quiz|chat|admin|sqid={}", sqid);
         String topic = MQTTUtils.TOPIC_QUIZ_CHAT_ADMIN + sqid;
         sendMqttRequest(topic, messageJson);
+    }
+
+    @Override
+    public boolean healthPing() {
+        try {
+            Map<String, String> payload = new HashMap<>(2);
+            payload.put("topic", MQTTUtils.TOPIC_HEALTH);
+            payload.put("message", "Exam Server | " + new Date());
+
+            HttpEntity<Map<String, String>> request = new HttpEntity<>(payload, headers);
+
+            ResponseEntity<Boolean> response = restTemplate.postForEntity(
+                    Constants.LMS_SEVER_BASE + "/mq/send",
+                    request,
+                    Boolean.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK || response.getStatusCode() == HttpStatus.CREATED) {
+                Boolean success = response.getBody();
+                return success != null && success;
+            }
+            return false;
+        } catch (Exception e) {
+            logger.error("Health ping MQTT failed: {}", e.getMessage());
+            return false;
+        }
     }
 
 }

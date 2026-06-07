@@ -34,6 +34,13 @@ public class VLEExamPreController {
         this.service = service;
     }
 
+    @PostMapping("/health")
+    public ResponseEntity<?> health(HttpServletRequest request,
+                                          HttpServletResponse response) {
+        logger.info(request.getRequestURI());
+        return service.health(request, response);
+    }
+
     @PostMapping("/upload-desk")
     public ResponseEntity uploadDeskImage(MultipartFile deskImage, MultipartFile image360, String qr,
                                           HttpServletRequest request,

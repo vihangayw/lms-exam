@@ -9,9 +9,11 @@ import lk.mc.model.ReuploadRequest;
 import lk.mc.service.JwtUserDetailsService;
 import lk.mc.std.bean.ExamPreflight;
 import lk.mc.std.bean.ExamPreflightAudit;
+import lk.mc.std.bean.HealthCheck;
 import lk.mc.std.job.NotificationJobService;
 import lk.mc.std.repository.ExamPreflightAuditRepository;
 import lk.mc.std.repository.ExamPreflightRepository;
+import lk.mc.std.repository.HealthCheckRepository;
 import lk.mc.std.util.Constants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +28,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static lk.mc.core.enums.JwtTypes.*;
@@ -47,17 +52,20 @@ public class ExamPreflightService {
     private final ExamPreflightRepository examPreflightRepository;
     private final ExamPreflightAuditRepository examPreflightAuditRepository;
     private final NotificationJobService notificationJobService;
+    private final HealthCheckRepository healthCheckRepository;
 
     public ExamPreflightService(LocaleService localeService,
                                 JwtUserDetailsService jwtUserDetailsService,
                                 ExamPreflightRepository examPreflightRepository,
                                 ExamPreflightAuditRepository examPreflightAuditRepository,
-                                NotificationJobService notificationJobService) {
+                                NotificationJobService notificationJobService,
+                                HealthCheckRepository healthCheckRepository) {
         this.localeService = localeService;
         this.jwtUserDetailsService = jwtUserDetailsService;
         this.examPreflightRepository = examPreflightRepository;
         this.examPreflightAuditRepository = examPreflightAuditRepository;
         this.notificationJobService = notificationJobService;
+        this.healthCheckRepository = healthCheckRepository;
     }
 
     public ResponseEntity<?> uploadImages(MultipartFile deskImage, MultipartFile image360, String qrcode, HttpServletRequest request, HttpServletResponse response) {
@@ -280,5 +288,34 @@ public class ExamPreflightService {
     }
 
 
+    public ResponseEntity<?> health(HttpServletRequest request, HttpServletResponse response) {
+        Map<String, Boolean> result = new LinkedHashMap<>();
+
+        // Check 1: DB — write a record with the current timestamp
+        boolean dbOk = false;
+        try {
+            healthCheckRepository.save(new HealthCheck(new Date()));
+            dbOk = true;
+        } catch (Exception e) {
+            logger.error("Health check DB failed: {}", e.getMessage());
+        }
+        result.put("db", dbOk);
+
+        // Check 2: File permission — create and delete a temp directory
+        boolean fileOk = false;
+        try {
+            File tmp = new File(Constants.SERVER_LOCAL_PATH + "health-tmp/" + new SecureRandom().nextInt());
+            fileOk = tmp.mkdirs() || tmp.exists();
+            tmp.delete();
+        } catch (Exception e) {
+            logger.error("Health check file permission failed: {}", e.getMessage());
+        }
+        result.put("filePermission", fileOk);
+
+        // Check 3: MQTT — publish to mc-exam/health in the same thread
+        result.put("mqtt", notificationJobService.healthPing());
+
+        return ResponseEntity.ok().body(new ResponseWrapper<>().responseOk(result));
+    }
 }
 
