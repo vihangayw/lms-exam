@@ -24,7 +24,6 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
@@ -170,6 +169,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
                     "https://mnp.metropolitancollege.lk",
                     "https://www.metropolitancollege.lk",
                     "https://www.metropolitancollegeedu.com",
+                    "https://sms.metropolitancollegeedu.com",
+                    "https://php.metropolitancollegeedu.com",
                     "https://metropolitancollegeedu.com",
                     "https://metropolitancollege.lk",
                     "http://212.47.73.190",
@@ -193,8 +194,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
             // admin
             CorsConfiguration configurationAdmin = new CorsConfiguration();
             configurationAdmin.setAllowedOrigins(Arrays.asList(
-                    "https://mnp.metropolitancollege.lk",
+                    "https://sms.metropolitancollegeedu.com",
                     "https://mnp.metropolitancollegeedu.com",
+                    "https://mnp.metropolitancollege.lk",
+                    "https://php.metropolitancollegeedu.com",
                     "http://212.47.73.190",
                     "http://localhost:3000",
                     "https://php.metropolitancollege.lk",

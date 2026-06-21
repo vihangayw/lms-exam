@@ -6,7 +6,7 @@ SET GLOBAL max_connections = 800;
 INSERT INTO configuration (id, val)
 VALUES ('local_path', '/opt/tomcat/webapps/ROOT/lms-mc/');
 INSERT INTO configuration (id, val)
-VALUES ('lms_server_base_url', 'https://mcp.metropolitancollege.lk/lms-mc');
+VALUES ('lms_server_base_url', 'https://sms.metropolitancollegeedu.com/lms-mc');
 INSERT INTO configuration (id, val)
 VALUES ('server_base_url', 'https://exams.metropolitancollege.lk/lms-exam/');
 

@@ -17,6 +17,9 @@ import lk.mc.std.repository.HealthCheckRepository;
 import lk.mc.std.util.Constants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jobrunr.configuration.JobRunr;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -53,19 +56,21 @@ public class ExamPreflightService {
     private final ExamPreflightAuditRepository examPreflightAuditRepository;
     private final NotificationJobService notificationJobService;
     private final HealthCheckRepository healthCheckRepository;
+    private final HealthIndicator jobRunr;
 
     public ExamPreflightService(LocaleService localeService,
                                 JwtUserDetailsService jwtUserDetailsService,
                                 ExamPreflightRepository examPreflightRepository,
                                 ExamPreflightAuditRepository examPreflightAuditRepository,
                                 NotificationJobService notificationJobService,
-                                HealthCheckRepository healthCheckRepository) {
+                                HealthCheckRepository healthCheckRepository, @Qualifier("JobRunr") HealthIndicator jobRunr) {
         this.localeService = localeService;
         this.jwtUserDetailsService = jwtUserDetailsService;
         this.examPreflightRepository = examPreflightRepository;
         this.examPreflightAuditRepository = examPreflightAuditRepository;
         this.notificationJobService = notificationJobService;
         this.healthCheckRepository = healthCheckRepository;
+        this.jobRunr = jobRunr;
     }
 
     public ResponseEntity<?> uploadImages(MultipartFile deskImage, MultipartFile image360, String qrcode, HttpServletRequest request, HttpServletResponse response) {
@@ -314,6 +319,8 @@ public class ExamPreflightService {
 
         // Check 3: MQTT — publish to mc-exam/health in the same thread
         result.put("mqtt", notificationJobService.healthPing());
+        result.put("job", JobRunr.getBackgroundJobServer().isRunning());
+
 
         return ResponseEntity.ok().body(new ResponseWrapper<>().responseOk(result));
     }

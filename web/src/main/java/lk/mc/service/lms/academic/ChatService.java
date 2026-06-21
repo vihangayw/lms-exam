@@ -58,7 +58,8 @@ public class ChatService {
      */
     public ResponseEntity<?> loadMessages(Integer sqid, HttpServletRequest request, HttpServletResponse response) {
         try {
-            jwtUserDetailsService.authenticate(request, response, STUDENT, VLE, ADMIN);
+            jwtUserDetailsService.authenticate(request, response, STUDENT, VLE, ADMIN, CRM_ADMIN, CRM_USER, COORDINATOR,
+                    COORDINATOR_USER, LECTURER, FINANCE);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>().responseFail(localeService.getMessage("auth.forbidden", request)));
@@ -137,7 +138,8 @@ public class ChatService {
     public ResponseEntity<?> sendAdminMessage(Integer sqid, AdminChatMessageRequest body,
                                               HttpServletRequest request, HttpServletResponse response) {
         try {
-            jwtUserDetailsService.authenticate(request, response, VLE, ADMIN);
+            jwtUserDetailsService.authenticate(request, response, VLE, ADMIN, CRM_ADMIN, CRM_USER, COORDINATOR,
+                    COORDINATOR_USER, LECTURER, FINANCE);
         } catch (AuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>().responseFail(localeService.getMessage("auth.forbidden", request)));
