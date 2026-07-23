@@ -41,6 +41,14 @@ public class VLEQuizController {
         return service.pic(image, sqid, cam, request, response);
     }
 
+    @PostMapping("/get-last-heartbeat/{sqid}")
+    public ResponseEntity<?> lhb(@PathVariable Integer sqid,
+                                 HttpServletRequest request,
+                                 HttpServletResponse response) {
+        logger.info(request.getRequestURI());
+        return service.lhb(sqid, request, response);
+    }
+
     @PostMapping("/audit-log")
     public ResponseEntity<?> addAuditLog(@RequestBody AuditLogRequest requestBody,
                                          HttpServletRequest request,

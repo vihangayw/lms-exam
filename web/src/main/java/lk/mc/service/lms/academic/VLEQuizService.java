@@ -5,10 +5,12 @@ import lk.mc.core.api.response.ResponseWrapper;
 import lk.mc.core.exceptions.AuthorizationException;
 import lk.mc.internationalization.service.LocaleService;
 import lk.mc.model.AuditLogRequest;
+import lk.mc.model.ExamStartRequest;
 import lk.mc.service.JwtUserDetailsService;
 import lk.mc.std.bean.ExamPic;
 import lk.mc.std.bean.ExamPreflightAudit;
 import lk.mc.std.job.NotificationJobService;
+import lk.mc.std.job.impl.NotificationJobServiceManager;
 import lk.mc.std.repository.ExamPreflightAuditRepository;
 import lk.mc.std.repository.StudentQuizRepository;
 import lk.mc.std.util.Constants;
@@ -17,9 +19,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PreDestroy;
@@ -31,10 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -59,7 +58,8 @@ public class VLEQuizService {
     private final StudentQuizRepository studentQuizRepository;
     private final ExamPreflightAuditRepository examPreflightAuditRepository;
     private final NotificationJobService notificationJobService;
-    
+    private final RestTemplate restTemplate;
+
     // Separate thread pools for cam and screen image notifications
     private final ExecutorService camImageExecutor;
     private final ExecutorService screenImageExecutor;
@@ -71,7 +71,8 @@ public class VLEQuizService {
         this.studentQuizRepository = studentQuizRepository;
         this.examPreflightAuditRepository = examPreflightAuditRepository;
         this.notificationJobService = notificationJobService;
-        
+        this.restTemplate = new RestTemplate();
+
         // Initialize thread pools for async notification processing
         // Configured for 400+ concurrent users
         // Cam image thread pool: core=50, max=100, queue=1000
@@ -311,5 +312,51 @@ public class VLEQuizService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseWrapper<>()
                     .responseFail("Error retrieving images: " + e.getMessage()));
         }
+    }
+
+    /**
+     * Get the last heartbeat (most recently added exam photo) date/time for a given sqid
+     *
+     * @param sqid     Student Quiz ID
+     * @param request  HTTP request
+     * @param response HTTP response
+     * @return ResponseEntity with the last heartbeat date/time
+     */
+    public ResponseEntity<?> lhb(Integer sqid, HttpServletRequest request, HttpServletResponse response) {
+        try {
+            Optional<ExamPic> lastPic = studentQuizRepository.findTopBySqIdOrderByAddedTimeDesc(sqid);
+            Date lastHeartbeat = lastPic.map(ExamPic::getAddedTime).orElse(null);
+
+            // Notify the LMS server of the last heartbeat regardless of whether a record exists
+            sendHeartbeatToLmsServer(sqid, lastHeartbeat);
+
+            return ResponseEntity.ok().body(new ResponseWrapper<>().responseOk(true));
+        } catch (Exception e) {
+            logger.error("Error retrieving last heartbeat for SQID: " + sqid, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseWrapper<>()
+                    .responseFail("Error retrieving last heartbeat: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Reports the last known heartbeat (activity) time for a student quiz session to the LMS server.
+     * Fired asynchronously so it never delays the response to the caller of {@link #lhb}.
+     *
+     * @param sqid Student Quiz ID
+     * @param end  Last known activity time, or null if none is available yet
+     */
+    private void sendHeartbeatToLmsServer(Integer sqid, Date end) {
+        screenImageExecutor.execute(() -> {
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.setBearerAuth(NotificationJobServiceManager.BEARER_TOKEN);
+
+                HttpEntity<ExamStartRequest> httpEntity = new HttpEntity<>(new ExamStartRequest(sqid, end), headers);
+                restTemplate.postForEntity(Constants.LMS_SEVER_BASE + "/mq/start", httpEntity, Boolean.class);
+            } catch (Exception e) {
+                logger.error("Failed to notify LMS server of heartbeat for SQID: {}", sqid, e);
+            }
+        });
     }
 }

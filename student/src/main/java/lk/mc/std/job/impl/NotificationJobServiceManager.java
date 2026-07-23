@@ -27,7 +27,7 @@ import java.util.Map;
 public class NotificationJobServiceManager implements NotificationJobService {
     private static final Logger logger = LogManager.getLogger(NotificationJobServiceManager.class);
 
-     private static final String BEARER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJWTEUiLCJuYW1lIjoiTE1TLU1DIiwiaWF0IjoxNjkxMzA2MDEwLCJhdXRob3IiOiJ2aWhhbmdhd2lja3MiLCJleHAiOjE5OTEzMDYwMTAsImlzcyI6Im1jOnZ5dzpqTWlGaWV6cjMxMyIsIm5iZiI6MTY5MTIwNTAwMH0.EAPlpsX1ZuoK5R_u4818-d4zJAIeXgXUKGqHu2x7SQM";
+    public static final String BEARER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJWTEUiLCJuYW1lIjoiTE1TLU1DIiwiaWF0IjoxNjkxMzA2MDEwLCJhdXRob3IiOiJ2aWhhbmdhd2lja3MiLCJleHAiOjE5OTEzMDYwMTAsImlzcyI6Im1jOnZ5dzpqTWlGaWV6cjMxMyIsIm5iZiI6MTY5MTIwNTAwMH0.EAPlpsX1ZuoK5R_u4818-d4zJAIeXgXUKGqHu2x7SQM";
     
     // Lightweight RestTemplate with connection pooling for high traffic
     private RestTemplate restTemplate;
